@@ -3,7 +3,8 @@
 namespace Sostheblack\InstagramApi;
 
 use Sostheblack\InstagramApi\Exceptions\CookieException;
-use Sostheblack\InstagramApi\Traits\CsrfToken;
+use Sostheblack\InstagramApi\Requests\LoginRequest;
+use Sostheblack\InstagramApi\Traits\Headers;
 
 /**
  * Class Instagram
@@ -12,12 +13,7 @@ use Sostheblack\InstagramApi\Traits\CsrfToken;
  */
 class Instagram extends InstagramApi
 {
-    use CsrfToken;
-
-    /**
-     * @var string
-     */
-    protected string $csrfToken;
+    use Headers;
 
     /**
      * Instagram constructor.
@@ -29,5 +25,11 @@ class Instagram extends InstagramApi
         parent::__construct();
 
         $this->defineCsrfToken();
+
+    }
+
+    public function login(): LoginRequest
+    {
+        return app(LoginRequest::class, [$this]);
     }
 }

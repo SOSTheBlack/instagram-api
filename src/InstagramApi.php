@@ -4,6 +4,8 @@ namespace Sostheblack\InstagramApi;
 
 use GuzzleHttp\Client as HttpClient;
 use Sostheblack\InstagramApi\Requests\HomeRequest;
+use Sostheblack\InstagramApi\Requests\LoginRequest;
+use Sostheblack\InstagramApi\Traits\Headers;
 
 /**
  * Class InstagramApi
@@ -12,6 +14,8 @@ use Sostheblack\InstagramApi\Requests\HomeRequest;
  */
 class InstagramApi extends HttpClient implements InstagramApiContracts
 {
+    use Headers;
+
     /**
      * Base URI.
      *
@@ -27,8 +31,10 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
         parent::__construct(['base_uri' => self::BASE_URI]);
     }
 
-    public function home()
+    public function home(): HomeRequest
     {
         return app(HomeRequest::class, [$this]);
     }
+
+
 }

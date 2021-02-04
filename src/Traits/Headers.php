@@ -12,12 +12,40 @@ use Sostheblack\InstagramApi\Exceptions\CookieException;
  *
  * @package Sostheblack\InstagramApi\Traits
  */
-trait CsrfToken
+trait Headers
 {
     /**
      * @var Response
      */
     private Response $homeResponse;
+
+    /**
+     * @var string
+     */
+    protected string $csrfToken;
+
+    /**
+     * @return array
+     */
+    public function getDefaultHeaders(): array
+    {
+        return [
+            "accept-encoding" => 'gzip, deflate, br',
+            "accept-language" => 'en-US,en;q=0.9',
+            "content-type" => 'application/x-www-form-urlencoded',
+            "origin" => 'https://www.instagram.com',
+            "referer" => 'https://www.instagram.com/',
+            "sec-fetch-dest" => 'empty',
+            "sec-fetch-mode" => 'cors',
+            "sec-fetch-site" => 'same-origin',
+            "user-agent" => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
+            "x-csrftoken" => $this->csrfToken,
+            "x-ig-app-id" => "936619743392459",
+            "x-ig-www-claim" => "0",
+            "x-instagram-ajax" => "ccf009398be5",
+            "x-requested-with" => "XMLHttpRequest",
+        ];
+    }
 
     /**
      * @return void
