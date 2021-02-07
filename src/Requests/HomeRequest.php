@@ -2,16 +2,14 @@
 
 namespace Sostheblack\InstagramApi\Requests;
 
-use GuzzleHttp\Psr7\Request;
 use Sostheblack\InstagramApi\InstagramApi;
-use Sostheblack\InstagramApi\Responses\HomeResponse;
 
 /**
  * Class HomeRequest
  *
  * @package Sostheblack\InstagramApi\Requests
  */
-class HomeRequest extends Request
+class HomeRequest extends BaseRequest
 {
     /**
      * API Endpoint.
@@ -30,13 +28,12 @@ class HomeRequest extends Request
     public function __construct(InstagramApi $instagramApi)
     {
         $this->instagramApi = $instagramApi;
-
-        parent::__construct('GET', self::ENDPOINT);
     }
 
     public function execute()
     {
-        return new HomeResponse($this->instagramApi->sendRequest($this));
-    }
+        $responseHome = $this->instagramApi->request(self::GET, self::ENDPOINT);
 
+        return $responseHome;
+    }
 }

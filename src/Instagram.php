@@ -11,10 +11,8 @@ use Sostheblack\InstagramApi\Traits\Headers;
  *
  * @package Sostheblack\InstagramApi
  */
-class Instagram extends InstagramApi
+class Instagram extends InstagramApi implements InstagramApiContracts
 {
-    use Headers;
-
     /**
      * Instagram constructor.
      *
@@ -23,13 +21,7 @@ class Instagram extends InstagramApi
     public function __construct()
     {
         parent::__construct();
-
-        $this->defineCsrfToken();
-
     }
 
-    public function login(): LoginRequest
-    {
-        return app(LoginRequest::class, [$this]);
-    }
+
 }

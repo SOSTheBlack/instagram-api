@@ -3,9 +3,8 @@
 namespace Sostheblack\InstagramApi\Requests;
 
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Psr7\Request;
-use Sostheblack\InstagramApi\Instagram;
 use Sostheblack\InstagramApi\InstagramApi;
+use Sostheblack\InstagramApi\InstagramApiContracts;
 use Sostheblack\InstagramApi\Responses\LoginResponse;
 
 /**
@@ -13,7 +12,7 @@ use Sostheblack\InstagramApi\Responses\LoginResponse;
  *
  * @package Sostheblack\InstagramApi\Requests
  */
-class LoginRequest extends Request
+class LoginRequest extends BaseRequest
 {
     /**
      * API Endpoint.
@@ -21,13 +20,6 @@ class LoginRequest extends Request
      * @const string
      */
     private const ENDPOINT = '/accounts/login/ajax/';
-
-    /**
-     * Request method.
-     *
-     * @const string
-     */
-    private const METHOD = 'POST';
 
     private string $username;
     private string $password;
@@ -38,13 +30,11 @@ class LoginRequest extends Request
     private InstagramApi $instagramApi;
 
     /**
-     * @param InstagramApi $instagramApi
+     * @param  InstagramApi  $instagramApi
      */
-    public function __construct(Instagram $instagramApi)
+    public function __construct(InstagramApi $instagramApi)
     {
         $this->instagramApi = $instagramApi;
-
-        parent::__construct(self::METHOD, self::ENDPOINT);
     }
 
     /**
@@ -55,33 +45,29 @@ class LoginRequest extends Request
     public function execute()
     {
         $form = [
-            "username" => $this->username,
-            "enc_password" => self::generateEncPassword($this->password)
+            "username"     => $this->username,
+            "enc_password" => self::generateEncPassword($this->password),
         ];
 
-        $responseLogin = $this->instagramApi->send($this, [
-            'form' => $form,
-            'headers' => $this->instagramApi->getDefaultHeaders()
-        ]);
+        $response = $this->instagramApi->request(self::POST, self::ENDPOINT, ['form_params' => $form]);
 
-        $loginResource = (new LoginResponse($responseLogin));
 
-        return $loginResource->toArray();
+
+        return $response;
     }
 
     /**
-     * @param string $password
+     * @param  string  $password
      *
      * @return string
      */
     private static function generateEncPassword(string $password): string
     {
-        return '#PWD_INSTAGRAM_BROWSER:0:' . time() . ":" . $password;
-
+        return '#PWD_INSTAGRAM_BROWSER:0:'.time().":".$password;
     }
 
     /**
-     * @param string $username
+     * @param  string  $username
      *
      * @return LoginRequest
      */
@@ -93,7 +79,18 @@ class LoginRequest extends Request
     }
 
     /**
-     * @param string $password
+     * Get the username logged.
+     *
+     * @return string
+     */
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
+
+    /**
+     * @param  string  $password
+     *
      * @return LoginRequest
      */
     public function setPassword(string $password): LoginRequest

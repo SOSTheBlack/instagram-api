@@ -25,26 +25,58 @@ trait Headers
     protected string $csrfToken;
 
     /**
-     * @return array
+     * @var array
      */
-    public function getDefaultHeaders(): array
-    {
-        return [
-            "accept-encoding" => 'gzip, deflate, br',
-            "accept-language" => 'en-US,en;q=0.9',
-            "content-type" => 'application/x-www-form-urlencoded',
-            "origin" => 'https://www.instagram.com',
-            "referer" => 'https://www.instagram.com/',
-            "sec-fetch-dest" => 'empty',
-            "sec-fetch-mode" => 'cors',
-            "sec-fetch-site" => 'same-origin',
-            "user-agent" => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
-            "x-csrftoken" => $this->csrfToken,
-            "x-ig-app-id" => "936619743392459",
-            "x-ig-www-claim" => "0",
+    protected array $headers = [
+            "accept-encoding"  => 'gzip, deflate, br',
+            "accept-language"  => 'en-US,en;q=0.9',
+            "content-type"     => 'application/x-www-form-urlencoded',
+            "origin"           => 'https://www.instagram.com',
+            "referer"          => 'https://www.instagram.com/',
+            "sec-fetch-dest"   => 'empty',
+            "sec-fetch-mode"   => 'cors',
+            "sec-fetch-site"   => 'same-origin',
+            "user-agent"       => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
+            "x-ig-app-id"      => "936619743392459",
+            "x-ig-www-claim"   => "0",
             "x-instagram-ajax" => "ccf009398be5",
             "x-requested-with" => "XMLHttpRequest",
         ];
+
+    /**
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    /**
+     * @param  array  $headers
+     *
+     * @return array
+     *
+     * @throws CookieException
+     */
+    protected function structureHeaders(array $headers): array
+    {
+        return array_merge($this->getDefaultHeaders(), $headers);
+    }
+
+    /**
+     * @return array
+     *
+     * @throws CookieException
+     */
+    public function getDefaultHeaders(): array
+    {
+        if (empty($this->csrfToken)) {
+            $this->csrfToken = 'process';
+
+            $this->defineCsrfToken();
+        }
+
+        return $this->headers;
     }
 
     /**
@@ -53,15 +85,17 @@ trait Headers
      */
     public function defineCsrfToken()
     {
-        $this->homeResponse = $this->home()->execute()->resource;
+        $this->homeResponse = $this->home()->execute();
 
-        $this->hasCookie(self::COOKIE_CSRF_KEY);
+        $this->hasHeader(self::COOKIE_CSRF_KEY);
 
         $cookieString = $this->getValueInHeader(self::COOKIE_CSRF_KEY, self::COOKIE_CSRF_SLUG);
 
-        $keyValueCsrf = $this->onlyByKey($cookieString,self::COOKIE_CSRF_SLUG);
+        $keyValueCsrf = $this->onlyByKey($cookieString, self::COOKIE_CSRF_SLUG);
 
         $this->csrfToken = $keyValueCsrf->after('=');
+
+        $this->headers = array_merge($this->headers, ['x-csrftoken' => $this->csrfToken]);
     }
 
     /**
@@ -69,7 +103,7 @@ trait Headers
      *
      * @throws CookieException
      */
-    private function hasCookie(string $cookieKey): void
+    private function hasHeader(string $cookieKey): void
     {
         if (! $this->homeResponse->hasHeader($cookieKey) || ! is_iterable($this->homeResponse->getHeader($cookieKey))) {
             throw new CookieException(vprintf('cookie "%s" not found', [$cookieKey]), 1001);
