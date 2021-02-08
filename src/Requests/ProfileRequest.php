@@ -18,7 +18,7 @@ class ProfileRequest extends BaseRequest
      *
      * @const string
      */
-    private const ENDPOINT = '/accounts/login/ajax/';
+    private const ENDPOINT = '/%s';
 
     private string $username;
 
@@ -42,14 +42,14 @@ class ProfileRequest extends BaseRequest
      */
     public function execute(?string $username = null)
     {
-        $endpoint = vprintf(self::ENDPOINT, [$username ?? $this->instagramApi->login->getUsername()]);
+        $endpoint = sprintf(self::ENDPOINT, $username ?? $this->instagramApi->login->getUsername());
 
         $responseProfile = $this->instagramApi->request(self::GET, $endpoint, [
             'query' => ['__a' => 1],
             'headers'     => $this->instagramApi->getHeaders(),
         ]);
 
-        return (string) $responseProfile->getBody();
+        return $responseProfile;
     }
 
     /**

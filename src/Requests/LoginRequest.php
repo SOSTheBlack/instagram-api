@@ -4,8 +4,6 @@ namespace Sostheblack\InstagramApi\Requests;
 
 use GuzzleHttp\Exception\GuzzleException;
 use Sostheblack\InstagramApi\InstagramApi;
-use Sostheblack\InstagramApi\InstagramApiContracts;
-use Sostheblack\InstagramApi\Responses\LoginResponse;
 
 /**
  * Class HomeRequest
@@ -38,7 +36,7 @@ class LoginRequest extends BaseRequest
     }
 
     /**
-     * @return LoginResponse
+     * @return \Psr\Http\Message\ResponseInterface
      *
      * @throws GuzzleException
      */
@@ -50,8 +48,6 @@ class LoginRequest extends BaseRequest
         ];
 
         $response = $this->instagramApi->request(self::POST, self::ENDPOINT, ['form_params' => $form]);
-
-
 
         return $response;
     }

@@ -4,8 +4,6 @@ namespace Sostheblack\InstagramApi;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Promise\PromiseInterface;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Sostheblack\InstagramApi\Requests\HomeRequest;
@@ -23,16 +21,14 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
 {
     use Headers, Requests;
 
-    public LoginRequest $login;
-    public ProfileRequest $profile;
-
-
     /**
      * Base URI.
      *
      * @const string
      */
     private const BASE_URI = 'https://www.instagram.com';
+    public LoginRequest $login;
+    public ProfileRequest $profile;
 
     /**
      * InstagramApi constructor.
@@ -45,9 +41,9 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
     /**
      * Create and send an HTTP request.
      *
-     * @param  string  $method  HTTP method.
-     * @param  string|UriInterface  $uri  URI object or string.
-     * @param  array  $options  Request options to apply. See \GuzzleHttp\RequestOptions.
+     * @param string $method HTTP method.
+     * @param string|UriInterface $uri URI object or string.
+     * @param array $options Request options to apply. See \GuzzleHttp\RequestOptions.
      *
      * @throws GuzzleException
      */
@@ -56,16 +52,11 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
         $options['headers'] = isset($options['headers']) ? $this->structureHeaders($options['headers']) : $this->structureHeaders([]);
 
         dump($uri);
-        $response =  parent::request($method, $uri, $options);
+        $response = parent::request($method, $uri, $options);
 
         $this->headers = array_merge($this->headers, $response->getHeaders());
 
         return $response;
-    }
-
-    protected function home(): HomeRequest
-    {
-        return $this->home = new HomeRequest(clone $this);
     }
 
     public function login(): LoginRequest
@@ -76,5 +67,10 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
     public function profile(): ProfileRequest
     {
         return $this->profile = new ProfileRequest(clone $this);
+    }
+
+    protected function home(): HomeRequest
+    {
+        return $this->home = new HomeRequest(clone $this);
     }
 }
