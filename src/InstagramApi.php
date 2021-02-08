@@ -51,7 +51,6 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
     {
         $options['headers'] = isset($options['headers']) ? $this->structureHeaders($options['headers']) : $this->structureHeaders([]);
 
-        dump($uri);
         $response = parent::request($method, $uri, $options);
 
         $this->headers = array_merge($this->headers, $response->getHeaders());

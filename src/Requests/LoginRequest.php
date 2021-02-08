@@ -47,9 +47,7 @@ class LoginRequest extends BaseRequest
             "enc_password" => self::generateEncPassword($this->password),
         ];
 
-        $response = $this->instagramApi->request(self::POST, self::ENDPOINT, ['form_params' => $form]);
-
-        return $response;
+        return $this->instagramApi->request(self::POST, self::ENDPOINT, ['form_params' => $form]);
     }
 
     /**

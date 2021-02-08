@@ -32,8 +32,8 @@ class HomeRequest extends BaseRequest
 
     public function execute()
     {
-        $responseHome = $this->instagramApi->request(self::GET, self::ENDPOINT);
+        config()->set('instagram-api.csrf-token', 'undefined');
 
-        return $responseHome;
+        return $this->instagramApi->request(self::GET, self::ENDPOINT);
     }
 }
