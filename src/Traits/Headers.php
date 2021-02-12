@@ -39,9 +39,9 @@ trait Headers
             "x-requested-with" => "XMLHttpRequest",
         ];
     /**
-     * @var Response
+     * @var \Illuminate\Http\Client\Response
      */
-    private Response $homeResponse;
+    private \Illuminate\Http\Client\Response $homeResponse;
 
     /**
      * @return array
@@ -103,7 +103,7 @@ trait Headers
      */
     private function hasHeader(string $cookieKey): void
     {
-        if (! $this->homeResponse->hasHeader($cookieKey) || ! is_iterable($this->homeResponse->getHeader($cookieKey))) {
+        if (! $this->homeResponse->header($cookieKey) || ! is_iterable($this->homeResponse->getHeader($cookieKey))) {
             throw new CookieException(vprintf('cookie "%s" not found', [$cookieKey]), 1001);
         }
     }
@@ -120,7 +120,7 @@ trait Headers
      */
     private function getValueInHeader(string $keyHeader, string $partValue): Stringable
     {
-        $header = collect($this->homeResponse->getHeader($keyHeader))->filter(fn($cookie) => Str::contains($cookie, $partValue));
+        $header = collect($this->homeResponse->header($keyHeader))->filter(fn($cookie) => Str::contains($cookie, $partValue));
 
         if ($header->isEmpty()) {
             throw new CookieException(sprintf('cookie "%s" not found in response header', $keyHeader));

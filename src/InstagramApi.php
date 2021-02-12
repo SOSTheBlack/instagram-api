@@ -4,6 +4,7 @@ namespace Sostheblack\InstagramApi;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Http\Client\Factory as Http;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Sostheblack\InstagramApi\Requests\HomeRequest;
@@ -17,7 +18,7 @@ use Sostheblack\InstagramApi\Traits\Requests;
  *
  * @package Sostheblack\InstagramApi
  */
-class InstagramApi extends HttpClient implements InstagramApiContracts
+class InstagramApi extends Http implements InstagramApiContracts
 {
     use Headers, Requests;
 
@@ -35,7 +36,8 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
      */
     public function __construct()
     {
-        parent::__construct(['base_uri' => self::BASE_URI]);
+        $this->withOptions(['base_uri' => self::BASE_URI]);
+//        parent::__construct(['base_uri' => self::BASE_URI]);
 
 //        $this->login();
 //        $this->profile();
@@ -50,18 +52,23 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
      *
      * @throws GuzzleException
      */
-    public function request(string $method, $uri = '', array $options = []): ResponseInterface
+    public function request(string $method, $uri = '', array $options = []): \Illuminate\Http\Client\Response
     {
         $options['headers'] = isset($options['headers']) ? $this->structureHeaders($options['headers']) : $this->structureHeaders([]);
 
-        $response = parent::request($method, $uri, $options);
+        $this->withHeaders($options['headers']);
 
-        $this->headers = array_merge($this->headers, $response->getHeaders());
+        unset($options['headers']);
+
+        /** @var \Illuminate\Http\Client\Response $response */
+        $response = $this->$method(self::BASE_URI.$uri, $options);
+
+        $this->headers = array_merge($this->headers, $response->headers());
 
         return $response;
     }
 
-    public function login(): AuthRequest
+    public function auth(): AuthRequest
     {
         return $this->login = new AuthRequest($this);
     }
