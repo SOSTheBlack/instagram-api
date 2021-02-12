@@ -7,7 +7,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Sostheblack\InstagramApi\Requests\HomeRequest;
-use Sostheblack\InstagramApi\Requests\LoginRequest;
+use Sostheblack\InstagramApi\Requests\AuthRequest;
 use Sostheblack\InstagramApi\Requests\ProfileRequest;
 use Sostheblack\InstagramApi\Traits\Headers;
 use Sostheblack\InstagramApi\Traits\Requests;
@@ -27,7 +27,7 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
      * @const string
      */
     private const BASE_URI = 'https://www.instagram.com';
-    public LoginRequest $login;
+    public AuthRequest $login;
     public ProfileRequest $profile;
 
     /**
@@ -36,6 +36,9 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
     public function __construct()
     {
         parent::__construct(['base_uri' => self::BASE_URI]);
+
+//        $this->login();
+//        $this->profile();
     }
 
     /**
@@ -58,14 +61,14 @@ class InstagramApi extends HttpClient implements InstagramApiContracts
         return $response;
     }
 
-    public function login(): LoginRequest
+    public function login(): AuthRequest
     {
-        return $this->login = new LoginRequest(clone $this);
+        return $this->login = new AuthRequest($this);
     }
 
     public function profile(): ProfileRequest
     {
-        return $this->profile = new ProfileRequest(clone $this);
+        return $this->profile = new ProfileRequest($this);
     }
 
     protected function home(): HomeRequest

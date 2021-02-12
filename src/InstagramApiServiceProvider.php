@@ -6,8 +6,16 @@ use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Sostheblack\InstagramApi\Commands\InstagramApiCommand;
 
+/**
+ * Class InstagramApiServiceProvider
+ *
+ * @package Sostheblack\InstagramApi
+ */
 class InstagramApiServiceProvider extends PackageServiceProvider
 {
+    /**
+     * @param  Package  $package
+     */
     public function configurePackage(Package $package): void
     {
         /*
@@ -21,5 +29,10 @@ class InstagramApiServiceProvider extends PackageServiceProvider
             ->hasViews()
             ->hasMigration('create_instagram_api_table')
             ->hasCommand(InstagramApiCommand::class);
+
+        config()->set('filesystems.disks.instagram-api', [
+            'driver' => 'local',
+            'root' => __DIR__ . '/../storage/auth',
+        ]);
     }
 }

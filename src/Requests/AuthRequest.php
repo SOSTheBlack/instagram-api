@@ -3,6 +3,9 @@
 namespace Sostheblack\InstagramApi\Requests;
 
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Support\Facades\Storage;
+use Sostheblack\InstagramApi\Exceptions\AuthException;
 use Sostheblack\InstagramApi\InstagramApi;
 
 /**
@@ -10,7 +13,7 @@ use Sostheblack\InstagramApi\InstagramApi;
  *
  * @package Sostheblack\InstagramApi\Requests
  */
-class LoginRequest extends BaseRequest
+class AuthRequest extends BaseRequest
 {
     /**
      * API Endpoint.
@@ -35,19 +38,39 @@ class LoginRequest extends BaseRequest
         $this->instagramApi = $instagramApi;
     }
 
+    public function actingAs(string $username): \stdClass
+    {
+        try {
+            $user = Storage::disk($this->instagramApi::STORAGE_DISK)->get(vsprintf('%s.json', [$username]));
+            $this->instagramApi->login->setUsername($username);
+
+            return json_decode($user);
+        } catch (FileNotFoundException $fileNotFoundException) {
+            throw new AuthException(message: 'Login required', previous: $fileNotFoundException);
+        }
+    }
+
     /**
      * @return \Psr\Http\Message\ResponseInterface
      *
      * @throws GuzzleException
      */
-    public function execute()
+    public function login()
     {
         $form = [
             "username"     => $this->username,
             "enc_password" => self::generateEncPassword($this->password),
         ];
 
-        return $this->instagramApi->request(self::POST, self::ENDPOINT, ['form_params' => $form]);
+        $loginResponse = $this->instagramApi->request(self::POST, self::ENDPOINT, ['form_params' => $form]);
+
+        $bodyResponse = json_decode($loginResponse->getBody()->getContents(), true);
+        $bodyResponse['username'] = $this->username;
+        $bodySession = array_merge($bodyResponse, ['headers' => $loginResponse->getHeaders()]);
+
+        Storage::disk('instagram-api')->put(vsprintf('%s.json', [$this->username]), json_encode($bodySession));
+
+        return $bodyResponse;
     }
 
     /**
@@ -63,9 +86,9 @@ class LoginRequest extends BaseRequest
     /**
      * @param  string  $username
      *
-     * @return LoginRequest
+     * @return AuthRequest
      */
-    public function setUsername(string $username): LoginRequest
+    public function setUsername(string $username): AuthRequest
     {
         $this->username = $username;
 
@@ -85,9 +108,9 @@ class LoginRequest extends BaseRequest
     /**
      * @param  string  $password
      *
-     * @return LoginRequest
+     * @return AuthRequest
      */
-    public function setPassword(string $password): LoginRequest
+    public function setPassword(string $password): AuthRequest
     {
         $this->password = $password;
 

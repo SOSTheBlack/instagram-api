@@ -44,10 +44,12 @@ class ProfileRequest extends BaseRequest
     {
         $endpoint = sprintf(self::ENDPOINT, $username ?? $this->instagramApi->login->getUsername());
 
-        return $this->instagramApi->request(self::GET, $endpoint, [
+        $profileResponse = $this->instagramApi->request(self::GET, $endpoint, [
             'query' => ['__a' => 1],
             'headers'     => $this->instagramApi->getHeaders(),
         ]);
+
+        return json_decode($profileResponse->getBody()->getContents());
     }
 
     /**
