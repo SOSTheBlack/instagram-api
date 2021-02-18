@@ -3,6 +3,7 @@
 namespace Sostheblack\InstagramApi\Requests;
 
 use GuzzleHttp\Exception\GuzzleException;
+use http\Client\Response;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Storage;
 use Sostheblack\InstagramApi\Exceptions\AuthException;
@@ -57,20 +58,21 @@ class AuthRequest extends BaseRequest
      */
     public function login()
     {
-        $form = [
+        $data = [
             "username"     => $this->username,
             "enc_password" => self::generateEncPassword($this->password),
         ];
 
-        $loginResponse = $this->instagramApi->request(self::POST, self::ENDPOINT, ['form_params' => $form]);
+        /** @var Response $loginResponse */
+        $loginResponse = $this->instagramApi->request(self::POST, self::ENDPOINT, $data);
 
-        $bodyResponse = json_decode($loginResponse->getBody()->getContents(), true);
-        $bodyResponse['username'] = $this->username;
-        $bodySession = array_merge($bodyResponse, ['headers' => $loginResponse->getHeaders()]);
+//        $bodyResponse = json_decode($loginResponse->getBody()->getContents(), true);
+//        $bodyResponse['username'] = $this->username;
+//        $bodySession = array_merge($bodyResponse, ['headers' => $loginResponse->getHeaders()]);
+//
+//        Storage::disk('instagram-api')->put(vsprintf('%s.json', [$this->username]), json_encode($bodySession));
 
-        Storage::disk('instagram-api')->put(vsprintf('%s.json', [$this->username]), json_encode($bodySession));
-
-        return $bodyResponse;
+        return $loginResponse;
     }
 
     /**
