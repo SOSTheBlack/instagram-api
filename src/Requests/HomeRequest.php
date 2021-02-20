@@ -2,6 +2,8 @@
 
 namespace Sostheblack\InstagramApi\Requests;
 
+use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Http\Client\Response;
 use Sostheblack\InstagramApi\InstagramApi;
 
 /**
@@ -17,6 +19,7 @@ class HomeRequest extends BaseRequest
      * @const string
      */
     private const ENDPOINT = '/';
+
     /**
      * @var InstagramApi
      */
@@ -30,7 +33,12 @@ class HomeRequest extends BaseRequest
         $this->instagramApi = $instagramApi;
     }
 
-    public function execute()
+    /**
+     * @return Response
+     *
+     * @throws GuzzleException
+     */
+    public function execute(): Response
     {
         config()->set('instagram-api.csrf-token', 'undefined');
 

@@ -2,7 +2,7 @@
 
 namespace Sostheblack\InstagramApi\Traits;
 
-use GuzzleHttp\Psr7\Response;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
 use Sostheblack\InstagramApi\Exceptions\CookieException;
@@ -24,24 +24,24 @@ trait Headers
      */
     protected array $headers
         = [
-            "accept-encoding"  => 'gzip, deflate, br',
-            "accept-language"  => 'en-US,en;q=0.9',
-            "content-type"     => 'application/x-www-form-urlencoded',
-            "origin"           => 'https://www.instagram.com',
-            "referer"          => 'https://www.instagram.com/',
-            "sec-fetch-dest"   => 'empty',
-            "sec-fetch-mode"   => 'cors',
-            "sec-fetch-site"   => 'same-origin',
-            "user-agent"       => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
-            "x-ig-app-id"      => "936619743392459",
-            "x-ig-www-claim"   => "0",
+            "accept-encoding" => 'gzip, deflate, br',
+            "accept-language" => 'en-US,en;q=0.9',
+            "content-type" => 'application/x-www-form-urlencoded',
+            "origin" => 'https://www.instagram.com',
+            "referer" => 'https://www.instagram.com/',
+            "sec-fetch-dest" => 'empty',
+            "sec-fetch-mode" => 'cors',
+            "sec-fetch-site" => 'same-origin',
+            "user-agent" => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
+            "x-ig-app-id" => "936619743392459",
+            "x-ig-www-claim" => "0",
             "x-instagram-ajax" => "ccf009398be5",
             "x-requested-with" => "XMLHttpRequest",
         ];
     /**
-     * @var \Illuminate\Http\Client\Response
+     * @var Response
      */
-    private \Illuminate\Http\Client\Response $homeResponse;
+    private Response $homeResponse;
 
     /**
      * @return array
@@ -52,13 +52,40 @@ trait Headers
     }
 
     /**
-     * @param  array  $headers
+     * @param array $headers
+     *
+     * @return Headers
+     */
+    public function setHeaders(array $headers): Headers
+    {
+        $this->headers = $headers;
+
+        return $this;
+    }
+
+    /**
+     * @param string $csrfToken
+     * @return Headers
+     */
+    public function setCsrfToken(string $csrfToken): self
+    {
+        $this->csrfToken = $csrfToken;
+
+        config()->set('instagram-api.csrf-token', $csrfToken);
+
+        $this->headers = array_merge($this->headers, ['x-csrftoken' => $csrfToken]);
+
+        return $this;
+    }
+
+    /**
+     * @param array $headers
      *
      * @return array
      *
      * @throws CookieException
      */
-    protected function structureHeaders(array $headers): array
+    protected function structureHeaders(array $headers = []): array
     {
         return array_merge($this->getDefaultHeaders(), $headers);
     }
@@ -93,17 +120,17 @@ trait Headers
 
         $csrfToken = $keyValueCsrf->after('=')->jsonSerialize();
 
-        $this->headers = array_merge($this->headers, ['x-csrftoken' => $csrfToken]);
+        $this->setCsrfToken($csrfToken);
     }
 
     /**
-     * @param  string  $cookieKey
+     * @param string $cookieKey
      *
      * @throws CookieException
      */
     private function hasHeader(string $cookieKey): void
     {
-        if (! $this->homeResponse->header($cookieKey) || ! is_iterable($this->homeResponse->getHeader($cookieKey))) {
+        if (!$this->homeResponse->header($cookieKey) || !is_iterable($this->homeResponse->getHeader($cookieKey))) {
             throw new CookieException(vprintf('cookie "%s" not found', [$cookieKey]), 1001);
         }
     }
@@ -111,8 +138,8 @@ trait Headers
     /**
      * String header of contains csrf token.
      *
-     * @param  string  $keyHeader
-     * @param  string  $partValue
+     * @param string $keyHeader
+     * @param string $partValue
      *
      * @return Stringable
      *
@@ -130,8 +157,8 @@ trait Headers
     }
 
     /**
-     * @param  Stringable  $cookieString
-     * @param  string  $key
+     * @param Stringable $cookieString
+     * @param string $key
      *
      * @return Stringable
      *
@@ -147,4 +174,5 @@ trait Headers
 
         return Str::of($stringCsrfKeyValue->first());
     }
+
 }
